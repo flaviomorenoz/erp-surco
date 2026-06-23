@@ -391,7 +391,7 @@ class Fm{
                         <li><a href="<?= base_url('products/index'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Listar Productos</a></li>
                         <li><a href="<?= base_url('products/add'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Nuevo Producto</a></li>
                         <li><a href="<?= base_url('inventarios/stock_productos'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Stock Productos</a></li>
-                        <li><a href="<?= base_url('products/print_inicial'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Código de Barras</a></li>
+                        <li><a href="<?= base_url('products/print_compra'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Código de Barras</a></li>
                     </ul>
                 </li>
 
@@ -635,7 +635,7 @@ class Fm{
 					    		</a>
 					    	</li>
 					    	<li>
-					    		<a href="<?= base_url('products/print_inicial'); ?>">
+					    		<a href="<?= base_url('products/print_compra'); ?>">
 					    			<span>Codigo de Barras</span>
 					    		</a>
 					    	</li>

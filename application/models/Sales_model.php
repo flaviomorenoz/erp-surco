@@ -24,8 +24,6 @@ class Sales_model extends CI_Model
             $forma = $ar_forma[$i];
             $monto = $ar_monto[$i];
 
-            //echo $i . ")" . $forma . " " . $monto . "<br>";
-
             if (strlen($monto."")>0 && ($monto."") != "0"){
                 $monto = floatval($monto);
                 if( $monto > 0){
@@ -47,14 +45,9 @@ class Sales_model extends CI_Model
 	}
 	
 	function correlativo($serie){
-		//$cSql = "select max(correlativo) maximo from tec_sales where serie = '$serie' and anulado!='1'";
-		//$query = $this->db->query($cSql);
-		
 		$this->db->select_max('correlativo');
 		$this->db->where('serie',$serie);
 		$this->db->where('correlativo is not null');
-		//$this->db->where('anulado!=','1');
-		
 		//$cad_sql = $this->db->get_compiled_select("tec_sales");
 
 		$query = $this->db->get("tec_sales");
@@ -68,7 +61,6 @@ class Sales_model extends CI_Model
 		}else{
 			return $el_maximo + 1;
 		}
-
 	}
 
 	function view($idx){
@@ -239,9 +231,9 @@ class Sales_model extends CI_Model
             //$fecha_venc     = $r->fec 
         }
 
-        traza("");
-        traza("$serie - $correlativo");
-        traza("tax : $tax");
+        //traza("");
+        //traza("$serie - $correlativo");
+        //traza("tax : $tax");
         $nTotal             = $total * (1 + ($tax/100)) * 1;
         $nTotal             = round($nTotal,2);
 
@@ -314,7 +306,7 @@ class Sales_model extends CI_Model
             $porcentajeIgv_       = $porcentajeIgv;
 
             $igv                = round($mtoBaseIgv * ($porcentajeIgv_/100),2); // round($r->subtotal - round($r->net_unit_price,2),2);
-            traza("igv : $igv");
+            //traza("igv : $igv");
             
             $tipAfeIgv          = 10;
             $totalImpuestos     = $igv;
@@ -365,7 +357,7 @@ class Sales_model extends CI_Model
           \"redondeo\": $redondeo,
           \"mtoImpVenta\": {$acu_subTotal},
           \"details\": [";
-        traza($campus3);
+        //traza($campus3);
 
         $cValor         = $acu_subTotal . "";
         $pos            = strpos($cValor, ".");

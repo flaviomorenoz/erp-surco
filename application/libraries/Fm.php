@@ -436,6 +436,8 @@ class Fm{
                         <li><a href="<?= base_url('inventarios/ver_movimientos'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Ver Movimientos</a></li>
                         <li><a href="<?= base_url('inventarios/add_traslados'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Mov. Traslado</a></li>
                         <li><a href="<?= base_url('inventarios/add_movimientos'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Mov. Otros</a></li>
+						<li><a href="<?= base_url('inventarios/listar_stock'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Ver Stock</a></li>
+						<li><a href="<?= base_url('inventarios/actualizar_stock'); ?>"><span class="sub-icon"><i class="fa fa-circle"></i></span> Actualizar Stock</a></li>
                     </ul>
                 </li>
 

@@ -321,27 +321,22 @@ if(!isset($store_id)){
     }
 
     function del_documento(id){ // Funcion inteligente (si es Factura le da de baja, si es Nota solo lo anula)
-        Swal.fire({
-            title: "Desea dar de Baja la Venta?",
-            showDenyButton: true, showCancelButton: false, confirmButtonText: "Si", denyButtonText: "No"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    data    : {id:id},
-                    url     : '<?= base_url('sales/delete') ?>',
-                    type    : 'get',
-                    success : function(response){
-                        var obj = JSON.parse(response)
-                        if(obj.rpta == '1'){
-                            Swal.fire("Se dio de Baja correctamente", "", "success");
-                        }else{
-                            alert(obj.message)
-                        }
-                        location.reload()
+        if(confirm("Desea dar de Baja la Venta?")){
+            $.ajax({
+                data    : {id:id},
+                url     : '<?= base_url('sales/delete') ?>',
+                type    : 'get',
+                success : function(response){
+                    var obj = JSON.parse(response)
+                    if(obj.rpta == '1'){
+                        alert("Se dio de Baja correctamente")
+                    }else{
+                        alert(obj.message)
                     }
-                })
-            }
-        });
+                    location.reload()
+                }
+            })
+        }
     }
 
 </script>

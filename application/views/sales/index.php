@@ -122,7 +122,7 @@ if(!isset($store_id)){
                         <th style="max-width:55px;color:red;text-align:center;">Tienda</th>
                         <th style="min-width:100px;color:red;">Fecha</th>
                         <th style="min-width:170px;color:red;">Cliente</th>
-                        <th style="min-width:55px;color:red;">recibo</th>
+                        <th style="min-width:60px;color:red;">recibo</th>
 
                         <th style="max-width:35px;color:red;text-align:center;">Nulo</th>
                         <th style="min-width:35px;color:red;text-align:center;">subtotal</th>
@@ -240,8 +240,20 @@ if(!isset($store_id)){
                 if (aData[5] == '1'){ $('td', nRow).css('background-color', 'gray');}
             },
             "columnDefs":[
-                { className: "dt-right", "targets": [4,5]}
-                ,{ 
+                { className: "dt-right", "targets": [6,7]},
+                { 
+                    render:function(data, type, row){
+                        let letra = row[4].substring(0,1)
+                        let cad = ""
+                        if(letra == 'B'){
+                            cad = "<div style='background-color:rgb(66, 93, 245);color:white;border-radius:6px;padding:5px;margin:2px;'>" + row[4] + "</div>"
+                        }elseif(letra == 'F'){
+                            cad = "<div style='background-color:rgb(245, 66, 66);color:white;border-radius:6px;padding:5px;margin:2px;'>" + row[4] + "</div>"
+                        }
+                        return cad
+                    },
+                    "targets":[4]
+                },{
                     render:function(data, type, row){
                         let valore = row[9]
                         return "<a href='https://cubifact.com/erp-surco/comprobantes/doc_" + row[0] + "_rpta.txt'>" + (valore.trim().length > 0 ? row[9] : ".") + "</a>"

@@ -450,8 +450,11 @@ class Sales_model extends CI_Model
             )
         );
 
-        $response = curl_exec($curl);
-        //$response = "Inactiva en modo desarrollo.";    // X X X X X X X X X X X X X X X X X X X X X SE DEBE QUITAR ESTO ***************
+        if($_SERVER["ACTIVAR_ENVIO_SUNAT"] == '1'){
+            $response = curl_exec($curl);
+        }else{
+            $response = "Inactiva en modo desarrollo.";    // X X X X X X X X X X X X X X X X X X X X SE DEBE QUITAR ESTO 
+        }
 
         curl_close($curl);
 

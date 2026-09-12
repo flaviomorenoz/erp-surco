@@ -120,8 +120,19 @@
 									foreach($query->result() as $r){
 										$n++;
 										echo "<tr>";
-										//echo $this->fm->celda($r->name . ' ' . $r->marca . ' ' . $r->modelo);
-										echo $this->fm->celda($r->product_name);
+										//echo $this->fm->celda($r->product_name);
+
+										if(is_null($r->comment)){
+											$nombre_producto = $r->product_name;
+										}else{
+											if (strlen(trim($r->comment)) > 0){
+												$nombre_producto = trim($r->comment);
+											}else{
+												$nombre_producto = $r->product_name;
+											}
+										}
+
+										echo $this->fm->celda($nombre_producto);
 										echo $this->fm->celda(number_format($r->quantity,2));
 										echo $this->fm->celda(number_format($r->net_unit_price,2));
 										echo $this->fm->celda($r->series);

@@ -950,68 +950,22 @@ class Fm{
     }
 
     function consulta_ruc($ruc){
-        // Datos
-        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMTAsImV4cCI6MTc1MTkyNzg4OX0.qLIrY_tWIVGjXng0SOFXQpuRjkXryArOlwh1urAr3Sw';
-        //
+		$token = $_SERVER["APIPERU_DNI"];
 
-        // Iniciar llamada a API
-        $curl = curl_init();
+		$rpta = file_get_contents("https://dniruc.apisperu.com/api/v1/ruc/{$ruc}?token={$token}");
 
-        // Buscar ruc sunat
-        curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://miapi.cloud/v1/ruc/' . $ruc,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'GET',
-        CURLOPT_HTTPHEADER => array(
-          'Referer: https://miapi.cloud/v1/ruc/',
-          'Authorization: Bearer ' . $token
-        ),
-        ));
+		$empresa = json_decode($rpta);
 
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-        // Datos de empresas según padron reducido
-        $empresa = json_decode($response);
-          
-          //var_dump($empresa);
-        return $empresa;
+		return $empresa;
     }
 
     function consulta_dni($dni){
-        // Datos
-        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMTAsImV4cCI6MTc1MTkyNzg4OX0.qLIrY_tWIVGjXng0SOFXQpuRjkXryArOlwh1urAr3Sw';
-        //
+		$token = $_SERVER["APIPERU_DNI"];
 
-        // Iniciar llamada a API
-        $curl = curl_init();
+		$rpta = file_get_contents("https://dniruc.apisperu.com/api/v1/dni/{$dni}?token={$token}");
 
-        // Buscar ruc sunat
-        curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://miapi.cloud/v1/dni/' . $dni,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'GET',
-        CURLOPT_HTTPHEADER => array(
-          'Referer: https://miapi.cloud/v1/dni/',
-          'Authorization: Bearer ' . $token
-        ),
-        ));
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-        // Datos de empresas según padron reducido
-        $empresa = json_decode($response);
+		// Datos de empresas según padron reducido
+        $empresa = json_decode($rpta);
           
           //var_dump($empresa);
         return $empresa;

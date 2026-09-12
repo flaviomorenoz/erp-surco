@@ -247,8 +247,10 @@ if(!isset($store_id)){
                         let cad = ""
                         if(letra == 'B'){
                             cad = "<div style='background-color:rgb(66, 93, 245);color:white;border-radius:6px;padding:5px;margin:2px;'>" + row[4] + "</div>"
-                        }elseif(letra == 'F'){
+                        }else if(letra == 'F'){
                             cad = "<div style='background-color:rgb(245, 66, 66);color:white;border-radius:6px;padding:5px;margin:2px;'>" + row[4] + "</div>"
+                        }else{
+                            cad = row[4]
                         }
                         return cad
                     },

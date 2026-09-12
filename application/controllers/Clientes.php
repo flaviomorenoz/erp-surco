@@ -144,61 +144,41 @@ class Clientes extends CI_Controller {
 
 	   			if(strlen(trim($dato1))<11){
 	   			
-	   				$respuesta["name_cliente"]		= $obj->datos->nombres . " " . $obj->datos->ape_paterno . " " . $obj->datos->ape_materno;
-	   				$respuesta["cf2"] 				= $obj->datos->dni;
+	   				$respuesta["name_cliente"]		= $obj->nombres . " " . $obj->apellidoPaterno . " " . $obj->apellidoMaterno;
+	   				$respuesta["cf2"] 				= $dato1;
 	   				$respuesta["id"] 				= $id;
-	   				$respuesta["direccion"] 		= $obj->datos->domiciliado->direccion;
+	   				$respuesta["direccion"] 		= "";
 	   			}
 
 	   			if(strlen(trim($dato1))==11){
 	   			
-	   				$respuesta["name_cliente"]		= $obj->datos->razon_social;
-	   				$respuesta["cf2"] 				= $obj->datos->ruc;
+	   				$respuesta["name_cliente"]		= $obj->razonSocial;
+	   				$respuesta["cf2"] 				= $obj->ruc;
 	   				$respuesta["id"] 				= $id;
-	   				$respuesta["direccion"] 		= $obj->datos->domiciliado->direccion;
+	   				$respuesta["direccion"] 		= $obj->direccion;
 	   			}
+
 	   		}
 
 		}
     	echo json_encode($respuesta);
     }
-/*
-	function ingreso_clientes_api($objeto, $tipo_datos){
-		if($tipo_datos == "RUC"){
-			//var_dump($objeto);
-			$ruc 		= $objeto->numeroDocumento;
-			$nombre 	= $objeto->nombre;
-			$direccion 	= $objeto->direccion;
-			$ar = array("cf2"=>$ruc, "name"=>$nombre, "direccion"=>$direccion);
-		}else{
-			$ruc 		= $objeto->numeroDocumento;
-			$nombre 	= $objeto->nombre;
-			$direccion 	= $objeto->direccion;
-			$ar = array("cf1"=>$ruc, "name"=>$nombre, "direccion"=>$direccion);
-		}
 
-		$this->db->set($ar)->insert("tec_customers");
-		return $this->db->insert_id();
-	}    
-*/
 	function ingreso_clientes_api($obj, $tipo_datos){
 		if($tipo_datos == "RUC"){
-			//var_dump($objeto);
-			$ruc 		= $obj->datos->ruc;
-			$nombre 	= $obj->datos->razon_social; //$obj->datos->nombres . " " . $obj->datos->ape_paterno . " " . $obj->datos->ape_materno;
-			$direccion 	= $obj->datos->domiciliado->direccion;
+			$ruc 		= $obj->ruc;
+			$nombre 	= $obj->razonSocial; //$obj->datos->nombres . " " . $obj->datos->ape_paterno . " " . $obj->datos->ape_materno;
+			$direccion 	= $obj->direccion;
 			$ar = array("cf2"=>$ruc, "name"=>$nombre, "direccion"=>$direccion);
 		}else{
-			$ruc 		= $obj->datos->dni;
-			$nombre 	= $obj->datos->nombres . " " . $obj->datos->ape_paterno . " " . $obj->datos->ape_materno;
-			$direccion 	= $obj->datos->domiciliado->direccion;
+			$ruc 		= $obj->dni;
+			$nombre 	= $obj->nombres . " " . $obj->apellidoPaterno . " " . $obj->apellidoMaterno;
+			$direccion 	= isset($obj->direccion) ? $obj->direccion : "";
 			$ar = array("cf1"=>$ruc, "name"=>$nombre, "direccion"=>$direccion);
 		}
 
 		$this->db->set($ar)->insert("tec_customers");
 		return $this->db->insert_id();
-		
-		//return 1;
 	}    
 
 }

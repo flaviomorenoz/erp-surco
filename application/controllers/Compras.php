@@ -40,8 +40,29 @@ class Compras extends CI_Controller {
         //$store_id = $_SESSION["store_id"];
         $query = $this->compras_model->get_compras($store_id, $desde, $hasta);
         $result = $query->result_array();
-        $ar_campos = array("id", "tienda", "fecha", "fecha_ingreso", "tipoDoc", "nroDoc", "proveedor", "username", "total", "actions");
+
+        // Agrego el icono de imagenes de cada compra (se previsualizan al pasar el mouse)
+        foreach($result as $k => $row){
+            $result[$k]["imagenes"] = $this->icono_imagenes_compra($row["id"], $row["fotos"]);
+        }
+
+        $ar_campos = array("id", "tienda", "fecha", "fecha_ingreso", "tipoDoc", "nroDoc", "proveedor", "username", "total", "actions", "imagenes");
         echo $this->fm->json_datatable($ar_campos, $result);
+    }
+
+    // Devuelve el HTML del icono de fotos de una compra, incluyendo las urls para la previsualizacion
+    private function icono_imagenes_compra($id, $fotos){
+        if(strlen($fotos) == 0){
+            return "<i class='glyphicon glyphicon-picture' style='font-size:16px;color:#cccccc' title='Sin imagenes'></i>";
+        }
+
+        $ar_urls = array();
+        foreach(explode(",", $fotos) as $nombre){
+            $ar_urls[] = base_url("imagenes/compras/" . $nombre);
+        }
+
+        return "<a href='#' class='ver_fotos' data-fotos='" . implode("|", $ar_urls) . "' title='Ver imagenes'>" .
+               "<i class='glyphicon glyphicon-picture' style='font-size:16px;color:#2b7bb9'></i></a>";
     }
 
 	function save(){

@@ -7,6 +7,23 @@
     .filitas{
         margin-top: 10px;
     }
+
+    /* Previsualizacion de imagenes de la compra (tooltip con miniaturas) */
+    #popup_fotos{
+        display: none;
+        position: fixed;
+        z-index: 20000;
+        max-width: 420px;
+        padding: 6px;
+        background: #fff;
+        border: 1px solid #999;
+        border-radius: 6px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    #example a.ver_fotos{
+        text-decoration: none;
+    }
 </style>
 <script type="text/javascript">
     var store_id = <?= $store_id ?>;
@@ -67,6 +84,7 @@
                     <th>Creado por</th>
                     <th>Total</th>
                     <th>Actions</th>
+                    <th>.</th>
                 </tr>
             </thead>
             <tfoot>
@@ -81,6 +99,7 @@
                     <th></th>
                     <th></th>
                     <th>.</th>
+                    <th></th>
                 </tr>
             </tfoot>
         </table>
@@ -117,6 +136,9 @@
     </div>
 
 </section>
+
+<!-- Contenedor flotante para las miniaturas de imagenes -->
+<div id="popup_fotos"></div>
 
 <script type="text/javascript">
     
@@ -163,6 +185,42 @@
             ]
 
         });
+
+        // Previsualizacion de las imagenes de la compra al pasar el mouse por el icono
+        var tFoto = null;
+
+        $(document).on('mouseenter', '#example a.ver_fotos', function(){
+            clearTimeout(tFoto);
+
+            var urls = ($(this).attr('data-fotos') || '').split('|');
+            var cad = '';
+            for(var i=0; i<urls.length; i++){
+                if(urls[i].length == 0){ continue; }
+                cad += '<img src="' + urls[i] + '" style="height:90px;width:auto;margin:3px;border:1px solid #ccc;border-radius:4px;background:#fff;">';
+            }
+
+            var rect = this.getBoundingClientRect();
+            var $pop = $('#popup_fotos');
+            $pop.html(cad).css({top: '-9999px', left: '-9999px'}).show();
+
+            var w = $pop.outerWidth();
+            var h = $pop.outerHeight();
+            var left = rect.right + 8;
+            if((left + w) > $(window).width()){ left = rect.left - w - 8; }
+            if(left < 4){ left = 4; }
+            var top = rect.top;
+            if((top + h) > $(window).height()){ top = $(window).height() - h - 8; }
+            if(top < 4){ top = 4; }
+
+            $pop.css({top: top + 'px', left: left + 'px'});
+        });
+
+        $(document).on('mouseleave', '#example a.ver_fotos', function(){
+            tFoto = setTimeout(function(){ $('#popup_fotos').hide(); }, 250);
+        });
+
+        $('#popup_fotos').on('mouseenter', function(){ clearTimeout(tFoto); });
+        $('#popup_fotos').on('mouseleave', function(){ $('#popup_fotos').hide(); });
     });
 
     function editar(id){

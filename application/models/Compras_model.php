@@ -32,7 +32,9 @@ class Compras_model extends CI_Model
             }
         }
 
-        $cSql = "select a.id, b.name tienda, date(a.fecha) fecha, date(a.fecha_ingreso) fecha_ingreso, c.descrip tipoDoc, a.nroDoc, tp.nombre proveedor, tu.username, a.total, concat('<a href=\'#\' title=\'Editar\' onclick=\'editar(',a.id,')\'></a>',
+        $cSql = "select a.id, b.name tienda, date(a.fecha) fecha, date(a.fecha_ingreso) fecha_ingreso, c.descrip tipoDoc, a.nroDoc, tp.nombre proveedor, tu.username, a.total,
+                (select group_concat(i.nombre order by i.id separator ',') from tec_imagenes i where i.tipo = 'COMPRA' and i.id2 = a.id) fotos,
+                concat('<a href=\'#\' title=\'Editar\' onclick=\'editar(',a.id,')\'></a>',
                 ' <a href=\'#\' title=\'Ver\' onclick=\'ver(',a.id,')\'><i class=\'glyphicon glyphicon-eye-open\' style=\'font-size:16px\'></i></a>&nbsp;',
                 ' <a href=\'#\' title=\'Editar\' onclick=\'editar(',a.id,')\'><i class=\'glyphicon glyphicon-edit\' style=\'font-size:16px\'></i></a>&nbsp;',
                 ' <a href=\'#\' title=\'Eliminar\' onclick=\'eliminar(',a.id,')\'><i class=\'glyphicon glyphicon-remove\' style=\'font-size:16px\'></i></a>') actions

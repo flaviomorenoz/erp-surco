@@ -122,7 +122,7 @@ if(!isset($store_id)){
                         <th style="max-width:55px;color:red;text-align:center;">Tienda</th>
                         <th style="min-width:100px;color:red;">Fecha</th>
                         <th style="min-width:170px;color:red;">Cliente</th>
-                        <th style="min-width:60px;color:red;">recibo</th>
+                        <th style="min-width:100px;color:red;">recibo</th>
 
                         <th style="max-width:35px;color:red;text-align:center;">Nulo</th>
                         <th style="min-width:35px;color:red;text-align:center;">subtotal</th>
@@ -286,6 +286,8 @@ if(!isset($store_id)){
                         return row[8] + valor11
                     },
                     "targets":[8]
+                },{
+                    "visible":false,"targets":[6]
                 }
 
             ]

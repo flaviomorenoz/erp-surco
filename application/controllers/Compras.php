@@ -217,6 +217,9 @@ class Compras extends CI_Controller {
                         $this->db->trans_commit();
                         $this->data["msg"] = "Se guarda la compra correctamente";
                         $this->data["rpta_msg"] = "success";
+
+                        // Guardando las fotos adjuntas de la compra (tabla tec_imagenes, tipo='COMPRA')
+                        $this->guardar_imagenes_compra($id);
                     }
 
         		}else{
@@ -227,6 +230,77 @@ class Compras extends CI_Controller {
         $this->data["page_title"] = "Agregar Compras";
         $this->template->load('view_layout_modern', 'compras/add', $this->data);
 	}	
+
+    // Guarda en disco y registra en tec_imagenes las fotos adjuntas a una compra
+    private function guardar_imagenes_compra($id){
+        if(!isset($_FILES["imagenes"])){
+            return;
+        }
+
+        $carpeta        = "imagenes/compras/";
+        $expensions     = array("jpeg", "jpg", "png", "gif");
+        $archivos       = $_FILES["imagenes"];
+
+        // Normalizo por si llega un solo archivo o varios inputs con nombre="imagenes[]"
+        $nombres    = is_array($archivos["name"])       ? $archivos["name"]       : array($archivos["name"]);
+        $tmp_names  = is_array($archivos["tmp_name"])   ? $archivos["tmp_name"]   : array($archivos["tmp_name"]);
+        $sizes      = is_array($archivos["size"])       ? $archivos["size"]       : array($archivos["size"]);
+
+        $n = count($nombres);
+
+        for($i = 0; $i < $n; $i++){
+            $file_tmp   = $tmp_names[$i];
+            $file_name  = $nombres[$i];
+            $file_size  = $sizes[$i];
+
+            if(strlen($file_tmp) == 0){
+                continue; // casilla sin archivo escogido
+            }
+
+            $ar_f       = explode('.', $file_name);
+            $file_ext   = strtolower(end($ar_f));
+
+            if(in_array($file_ext, $expensions) === false){
+                continue; // extension no permitida
+            }
+
+            if($file_size > 2097152){
+                continue; // mayor a 2 MB
+            }
+
+            // Nombre unico para no sobreescribir archivos con el mismo nombre
+            $nombre_nuevo = "compra_" . $id . "_" . uniqid() . "." . $file_ext;
+
+            if(move_uploaded_file($file_tmp, $carpeta . $nombre_nuevo)){
+                $this->compras_model->guardar_imagen("COMPRA", $id, $nombre_nuevo);
+            }
+        }
+    }
+
+    // Elimina una foto asociada a una compra (registro en tec_imagenes y archivo en disco)
+    function eliminar_imagen(){
+        $ar = array();
+        if(isset($_REQUEST["id"])){
+            $id = $_REQUEST["id"];
+
+            $imagen = $this->compras_model->get_imagen($id);
+            if(!is_null($imagen)){
+                $archivo = "imagenes/compras/" . $imagen->nombre;
+                if(file_exists($archivo)){
+                    unlink($archivo);
+                }
+            }
+
+            $this->compras_model->eliminar_imagen($id);
+
+            $ar["rpta_msg"] = "success";
+            $ar["message"]  = "Se eliminó la imagen";
+        }else{
+            $ar["rpta_msg"] = "danger";
+            $ar["message"]  = "No se pudo eliminar la imagen";
+        }
+        echo json_encode($ar);
+    }
 	
     function almaceno_en_temporal($usuario, $data){
         // Limpio primero la tabla

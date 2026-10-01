@@ -15,6 +15,9 @@
     }
 
     $id = $code = $name = $marca = $modelo = $color = $alert_cantidad = $price = $precio_x_mayor = "";
+
+    // Imagenes asociadas a la compra (tabla tec_imagenes, tipo = 'COMPRA')
+    $ar_imagenes_compra = array();
 ?>
     <script type="text/javascript">
         var ar_items    = new Array();
@@ -56,28 +59,15 @@
             subtotal:   ".($r->cantidad * 1 * $r->precio_sin_igv).",
             precio:     ".$r->precio_con_igv."})\n";
 
-            /*
-            echo "ar_items[$ni] = ['id' " . $r->product_id . ","
-                . $r->product_id . ","
-                . "'" . $r->product_name . "',"
-                . $r->cantidad . ","
-                . $r->precio_sin_igv . ","
-                . $r->subtotal . ","
-                . $r->precio_con_igv . "];\n";
-
-            
-            echo "ar_items['id']="          . $r->product_id . "\n";
-            echo "ar_items['name']='"       . $r->product_name . "'\n";
-            echo "ar_items['quantity']="    . $r->cantidad . "\n";
-            echo "ar_items['cost']="        . $r->precio_sin_igv . "\n";
-            echo "ar_items['subtotal']="    . $r->subtotal . "\n";
-            echo "ar_items['precio']="      . $r->precio_con_igv . "\n";*/
             $ni++;
         }
         if($ni>0){
             echo "window.addEventListener('load', function() { cargar_items(); });";
             echo "</script>\n";
         }
+
+        // Imagenes de la compra (para visualizarlas en miniatura al editar)
+        $ar_imagenes_compra = $this->compras_model->get_imagenes("COMPRA", $id_compras);
     }
 ?>
 <!--<link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>
@@ -97,7 +87,10 @@
         height: 35px;
         padding: 4px !important;
     }
-
+    .angosto{
+        margin:0px!important;
+        padding:4px!important;
+    }
 </style>
 <section class="content">
 
@@ -263,6 +256,42 @@
         </div>
     </div>
 
+    <!--================== F O T O S   D E   L A   C O M P R A ==================-->
+    <?php if(count($ar_imagenes_compra) > 0){ ?>
+    <div class="row filitas">
+        <div class="col-xs-12 col-sm-12">
+            <label>Fotos registradas de esta compra</label>
+            <div class="row">
+                <?php foreach($ar_imagenes_compra as $img){ ?>
+                    <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" style="margin-bottom:10px; text-align:center;">
+                        <a href="<?= base_url('imagenes/compras/'.$img->nombre) ?>" target="_blank">
+                            <img src="<?= base_url('imagenes/compras/'.$img->nombre) ?>" class="img-thumbnail" style="height:90px;">
+                        </a><br>
+                        <a href="#" onclick="eliminar_imagen(<?= $img->id ?>); return false;" style="font-size:12px; color:red;">
+                            <i class="glyphicon glyphicon-trash"></i> Eliminar
+                        </a>
+                    </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+    <?php } ?>
+
+    <div class="row filitas">
+        <div class="col-xs-12 col-sm-12">
+            <label>Agregar fotos <small class="text-muted">(puede agregar la cantidad de fotos que necesite)</small></label>
+            <div id="contenedor_imagenes">
+                <div class="input_imagen" style="margin-bottom:5px;">
+                    <input type="file" name="imagenes[]" accept="image/*" onchange="previsualizar_imagen(this)">
+                </div>
+            </div>
+            <button type="button" class="btn btn-default btn-sm" onclick="agregar_campo_imagen()">
+                <i class="glyphicon glyphicon-plus"></i> Agregar foto
+            </button>
+            <div id="preview_imagenes" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
     <div class="row filitas">
         <input type="hidden" name="id_compras" id="id_compras" value="<?= $id_compras ?>">
         <input type="hidden" name="txt_gSubtotal" id="txt_gSubtotal">
@@ -418,6 +447,48 @@
     var lBuscar     = true;
 
     document.getElementById("campo").addEventListener("keyup", getCodigos)
+
+    // ============ FOTOS DE LA COMPRA ============
+    function agregar_campo_imagen(){
+        var cont = document.getElementById("contenedor_imagenes")
+        var div  = document.createElement("div")
+        div.className = "input_imagen"
+        div.style.marginBottom = "5px"
+        div.innerHTML = '<input type="file" name="imagenes[]" accept="image/*" onchange="previsualizar_imagen(this)">'
+        cont.appendChild(div)
+    }
+
+    function previsualizar_imagen(input){
+        if(input.files && input.files[0]){
+            var lector  = new FileReader()
+            var img     = document.createElement("img")
+            img.className           = "img-thumbnail"
+            img.style.height        = "90px"
+            img.style.marginRight   = "5px"
+            img.style.marginBottom  = "5px"
+            lector.onload = function(e){ img.src = e.target.result }
+            lector.readAsDataURL(input.files[0])
+            document.getElementById("preview_imagenes").appendChild(img)
+        }
+    }
+
+    function eliminar_imagen(id){
+        if(confirm("¿Desea eliminar esta foto?")){
+            $.ajax({
+                data    : {id:id},
+                type    : "get",
+                url     : "<?= base_url('compras/eliminar_imagen') ?>",
+                success : function(res){
+                    var obj = JSON.parse(res)
+                    if(obj.rpta_msg == "success"){
+                        location.reload()
+                    }else{
+                        alert(obj.message)
+                    }
+                }
+            })
+        }
+    }
 
     function guardar_producto(){
         $.ajax({
@@ -656,13 +727,13 @@
         cad += '<table id="clasico" class="table table-striped table-bordered">'
         cad += '<thead>'
         cad += '    <tr class="active">'
-        cad += '        <th class="col-xs-5 col-sm-4"><?= lang("product"); ?></th>'
-        cad += '        <th class="col-xs-2 col-sm-1"><?= lang("quantity"); ?></th>'
-        cad += '        <th class="col-xs-2 col-sm-2">P.U sin Igv</th>'
+        cad += '        <th class="col-xs-5 col-sm-4 angosto"><?= lang("product"); ?></th>'
+        cad += '        <th class="col-xs-2 col-sm-1 angosto"><?= lang("quantity"); ?></th>'
+        cad += '        <th class="col-xs-2 col-sm-2 angosto">P.U sin Igv</th>'
         //cad += '        <th class="col-xs-2 col-sm-1">Peso_caja</th>'
-        cad += '        <th class="col-xs-2 col-sm-2" style="color:red;font-style:italic;">P.U con Igv</th>'
-        cad += '        <th class="col-xs-3 col-sm-2" style="text-align:right"><?= lang("subtotal"); ?></th>'
-        cad += '        <th class="col-xs-2 col-sm-1" style="">Accion</th>'
+        cad += '        <th class="col-xs-2 col-sm-2 angosto" style="color:red;font-style:italic;">P.U con Igv</th>'
+        cad += '        <th class="col-xs-3 col-sm-2 angosto" style="text-align:right"><?= lang("subtotal"); ?></th>'
+        cad += '        <th class="col-xs-2 col-sm-1 angosto" style="">Accion</th>'
         
         cad += '    </tr>'
         cad += '</thead>'
@@ -671,30 +742,30 @@
         //console.log("funcion cargar_items : ar_items:"+JSON.stringify(ar_items))
 
         for(let i=0; i<Limite; i++){
-            cad += "<tr>"
+            cad += "<tr style=\"height:25px;\">"
             
             // Nombre
-            cad += '<td style="text-align: left" class="col-xs-5 col-sm-4">' + ar_items[i]["name"] 
+            cad += '<td style="text-align: left" class="col-xs-5 col-sm-4 angosto">' + ar_items[i]["name"] 
             cad += '<input type="hidden" name="product_id[]" value="'+ar_items[i]['id'] + '" class="form-control">'
             cad += '<input type="hidden" name="rubro_id[]" value="' + ar_items[i]['rubro_id'] + '">'
             cad += '<input type="hidden" name="descripo[]" value="' + ar_items[i]['name'] + '"</td>'
             
             // Quantity
-            cad += '<td class="col-xs-2 col-sm-1"><input size="4" style="text-align: right;padding:2px;" type="text" name="quantity[]" value="' + ar_items[i]["quantity"] + '"  class="form-control" readonly></td>'
+            cad += '<td class="col-xs-2 col-sm-1 angosto"><input size="4" style="text-align: right;padding:2px;" type="text" name="quantity[]" value="' + ar_items[i]["quantity"] + '"  class="form-control" readonly></td>'
             
             // Costo
-            cad += '<td class="col-xs-2 col-sm-2"><input size="9" style="text-align: right" type="text" name="cost[]" value="' + ar_items[i]["cost"] + '"  class="form-control" readonly></td>'
+            cad += '<td class="col-xs-2 col-sm-2 angosto"><input size="9" style="text-align: right" type="text" name="cost[]" value="' + ar_items[i]["cost"] + '"  class="form-control" readonly></td>'
             
             // con Igv
-            cad += '<td class="col-xs-2 col-sm-2" style="color:red"><input size="9" style="text-align: right" type="text" name="precio[]" value="' + ar_items[i]["precio"] + '"  class="form-control" readonly>' + '</td>'
+            cad += '<td class="col-xs-2 col-sm-2 angosto" style="color:red"><input size="9" style="text-align: right" type="text" name="precio[]" value="' + ar_items[i]["precio"] + '"  class="form-control" readonly>' + '</td>'
 
             // Subtotal
             let nSubTotalx = ar_items[i]["subtotal"] * 1
             // .toLocaleString('es-PE',{ style: 'currency', currency: 'PEN' })
-            cad += '<td style="text-align: right" class="col-xs-3 col-sm-2">' + nSubTotalx.toLocaleString('es-PE') + "</td>"
+            cad += '<td style="text-align: right" class="col-xs-3 col-sm-2 angosto">' + nSubTotalx.toLocaleString('es-PE') + "</td>"
             
             // Trash
-            cad += '<td style="text-align: center" class="col-xs-2 col-sm-1"><a href="#" onclick="quitar_item(ar_items,'+i+')"><i class="fa fa-trash-o"></i></a></td>'
+            cad += '<td style="text-align: center" class="col-xs-2 col-sm-1 angosto"><a href="#" onclick="quitar_item(ar_items,'+i+')"><i class="fa fa-trash-o"></i></a></td>'
             
             cad += "</tr>"
             gParcial = 1 * ar_items[i]["quantity"] * ar_items[i]["cost"]

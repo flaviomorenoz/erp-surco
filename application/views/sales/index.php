@@ -43,6 +43,21 @@ if(!isset($store_id)){
         padding: 10px 3px !important;
         font-size: 9px;
     }
+    /* Previsualizacion de imagenes de la venta (tooltip con miniaturas) */
+    #popup_fotos{
+        display: none;
+        position: fixed;
+        z-index: 20000;
+        max-width: 420px;
+        padding: 6px;
+        background: #fff;
+        border: 1px solid #999;
+        border-radius: 6px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    #example a.ver_fotos{
+        text-decoration: none;
+    }
     @media print {
       body * {
         visibility: hidden; /* Oculta todo */
@@ -130,6 +145,7 @@ if(!isset($store_id)){
                         <th style="min-width:150px;color:red;">Productos</th>
                         <th style="min-width:10px;color:red;">Sunat</th>
     					
+                        <th style="min-width:40px;color:red;text-align:center;">.</th>
                         <th style="min-width:120px;color:red;">Actions</th>
                     </tr>
                 </thead>
@@ -147,6 +163,7 @@ if(!isset($store_id)){
                         <th></th>
                         <th></th>
 
+                        <th></th>
                         <th></th>
                     </tr>
                 </tfoot>
@@ -181,6 +198,9 @@ if(!isset($store_id)){
         </div>
     </div>
 </section>
+
+<!-- Contenedor flotante para las miniaturas de imagenes -->
+<div id="popup_fotos"></div>
 
 <script type="text/javascript">
     
@@ -274,14 +294,14 @@ if(!isset($store_id)){
                         valore = valore + "&nbsp;<a href=\"#\" onclick=\"del_documento('" + row[0] + "')\"><i class='glyphicon glyphicon-remove' style='font-size:16px;color:red'></i></a>"
                         return valore
                     },
-                    "targets":[10]
+                    "targets":[11]
                 },{
                     render: function(data, type, row){
                         let valor11 = ""
-                        if(row[11] === undefined){
+                        if(row[12] === undefined){
                             valor11 = ""
                         }else{
-                            valor11 = "(" + row[11] + ")"
+                            valor11 = "(" + row[12] + ")"
                         }
                         return row[8] + valor11
                     },
@@ -297,6 +317,42 @@ if(!isset($store_id)){
         $("#myBtn").click(function(){
             $("#pizarra").modal();
         });
+
+        // Previsualizacion de las imagenes de la venta al pasar el mouse por el icono
+        var tFoto = null;
+
+        $(document).on('mouseenter', '#example a.ver_fotos', function(){
+            clearTimeout(tFoto);
+
+            var urls = ($(this).attr('data-fotos') || '').split('|');
+            var cad = '';
+            for(var i=0; i<urls.length; i++){
+                if(urls[i].length == 0){ continue; }
+                cad += '<img src="' + urls[i] + '" style="height:90px;width:auto;margin:3px;border:1px solid #ccc;border-radius:4px;background:#fff;">';
+            }
+
+            var rect = this.getBoundingClientRect();
+            var $pop = $('#popup_fotos');
+            $pop.html(cad).css({top: '-9999px', left: '-9999px'}).show();
+
+            var w = $pop.outerWidth();
+            var h = $pop.outerHeight();
+            var left = rect.right + 8;
+            if((left + w) > $(window).width()){ left = rect.left - w - 8; }
+            if(left < 4){ left = 4; }
+            var top = rect.top;
+            if((top + h) > $(window).height()){ top = $(window).height() - h - 8; }
+            if(top < 4){ top = 4; }
+
+            $pop.css({top: top + 'px', left: left + 'px'});
+        });
+
+        $(document).on('mouseleave', '#example a.ver_fotos', function(){
+            tFoto = setTimeout(function(){ $('#popup_fotos').hide(); }, 250);
+        });
+
+        $('#popup_fotos').on('mouseenter', function(){ clearTimeout(tFoto); });
+        $('#popup_fotos').on('mouseleave', function(){ $('#popup_fotos').hide(); });
 
     });
 

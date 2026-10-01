@@ -79,12 +79,14 @@
                     <th>Fecha<br>Pago</th>
                     <th>Fecha<br>ingreso</th>
                     <th>TipoDoc</th>
+                    
                     <th>NroDoc</th>
                     <th>Proveedor</th>
                     <th>Creado por</th>
                     <th>Total</th>
-                    <th>Actions</th>
                     <th>.</th>
+                    
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tfoot>
@@ -94,12 +96,14 @@
                     <th></th>
                     <th></th>
                     <th></th>
+                    
                     <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
+                    <th></th>
+                    
                     <th>.</th>
-                    <th></th>
                 </tr>
             </tfoot>
         </table>

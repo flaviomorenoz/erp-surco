@@ -172,7 +172,7 @@ if(isset($existe_apertura)){
 ?>
 	<div class="row">
 		<div class="col-12 col-sm-10 col-lg-10 ventas">
-			<form name="form1" id="form1" action="<?= base_url("sales/save") ?>" method="POST">
+			<form name="form1" id="form1" action="<?= base_url("sales/save") ?>" method="POST" enctype="multipart/form-data">
 				<div class="row filitas">
 					<div class="col-5 col-sm-4 col-lg-4 ventas">
 						<label class="label-control">Fecha</label>
@@ -361,6 +361,42 @@ if(isset($existe_apertura)){
 				
 				<div class="row filitas" style="border-style:none; border-color:black;">
 					<div class="col-12 col-sm-12 ventas">
+										<!--================== F O T O S   D E   L A   V E N T A ==================-->
+				<?php if(isset($ar_imagenes_venta) && count($ar_imagenes_venta) > 0){ ?>
+				<div class="row filitas">
+					<div class="col-xs-12 col-sm-12">
+						<label>Fotos registradas de esta venta</label>
+						<div class="row">
+							<?php foreach($ar_imagenes_venta as $img){ ?>
+								<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" style="margin-bottom:10px; text-align:center;">
+									<a href="<?= base_url('imagenes/ventas/'.$img->nombre) ?>" target="_blank">
+										<img src="<?= base_url('imagenes/ventas/'.$img->nombre) ?>" class="img-thumbnail" style="height:90px;">
+									</a><br>
+									<a href="#" onclick="eliminar_imagen(<?= $img->id ?>); return false;" style="font-size:12px; color:red;">
+										<i class="glyphicon glyphicon-trash"></i> Eliminar
+									</a>
+								</div>
+							<?php } ?>
+						</div>
+					</div>
+				</div>
+				<?php } ?>
+
+				<div class="row filitas">
+					<div class="col-xs-12 col-sm-12">
+						<label>Agregar fotos <small class="text-muted">(puede agregar la cantidad de fotos que necesite)</small></label>
+						<div id="contenedor_imagenes">
+							<div class="input_imagen" style="margin-bottom:5px;">
+								<input type="file" name="imagenes[]" accept="image/*" onchange="previsualizar_imagen(this)">
+							</div>
+						</div>
+						<button type="button" class="btn btn-default btn-sm" onclick="agregar_campo_imagen()">
+							<i class="glyphicon glyphicon-plus"></i> Agregar foto
+						</button>
+						<div id="preview_imagenes" style="margin-top:10px;"></div>
+					</div>
+				</div>
+
 						<button type="button" class="btn btn-primary" onclick="grabar_venta()">Guardar</button>
 					</div>
 				</div>
@@ -834,6 +870,48 @@ if(isset($existe_apertura)){
     function quitar_item(pid){
         ar_items.splice(pid,1);
         cargar_items()
+    }
+
+    // ============ FOTOS DE LA VENTA ============
+    function agregar_campo_imagen(){
+        var cont = document.getElementById("contenedor_imagenes")
+        var div  = document.createElement("div")
+        div.className = "input_imagen"
+        div.style.marginBottom = "5px"
+        div.innerHTML = '<input type="file" name="imagenes[]" accept="image/*" onchange="previsualizar_imagen(this)">'
+        cont.appendChild(div)
+    }
+
+    function previsualizar_imagen(input){
+        if(input.files && input.files[0]){
+            var lector  = new FileReader()
+            var img     = document.createElement("img")
+            img.className           = "img-thumbnail"
+            img.style.height        = "90px"
+            img.style.marginRight   = "5px"
+            img.style.marginBottom  = "5px"
+            lector.onload = function(e){ img.src = e.target.result }
+            lector.readAsDataURL(input.files[0])
+            document.getElementById("preview_imagenes").appendChild(img)
+        }
+    }
+
+    function eliminar_imagen(id){
+        if(confirm("¿Desea eliminar esta foto?")){
+            $.ajax({
+                data    : {id:id},
+                type    : "get",
+                url     : "<?= base_url('sales/eliminar_imagen') ?>",
+                success : function(res){
+                    var obj = JSON.parse(res)
+                    if(obj.rpta_msg == "success"){
+                        location.reload()
+                    }else{
+                        alert(obj.message)
+                    }
+                }
+            })
+        }
     }
 	
 	function grabar_venta(){

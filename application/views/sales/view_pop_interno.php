@@ -205,3 +205,30 @@
 				<a href="javascript:imprSelec('seleccion')" class="btn btn-primary">Imprimir</a>
 			</div>
 		</div>-->
+
+<?php
+	// Imagenes (miniaturas) asociadas a esta venta (tabla tec_imagenes, tipo='VENTA')
+	$filas_venta = $query->result();
+	$id_venta_img = (count($filas_venta) > 0) ? $filas_venta[0]->id : 0;
+	$ar_imagenes_venta = ($id_venta_img > 0) ? $this->sales_model->get_imagenes("VENTA", $id_venta_img) : array();
+?>
+<style type="text/css">
+	@media print { .galeria_venta { display: none !important; } }
+</style>
+<?php if(count($ar_imagenes_venta) > 0){ ?>
+<div class="row galeria_venta" style="margin:auto; margin-top:10px;">
+	<div class="col-sm-12">
+		<label>Fotos de la venta</label>
+		<div class="row">
+			<?php foreach($ar_imagenes_venta as $img){ ?>
+				<div class="col-xs-4 col-sm-3 col-md-2" style="margin-bottom:10px; text-align:center;">
+					<a href="<?= base_url('imagenes/ventas/'.$img->nombre) ?>" target="_blank">
+						<img src="<?= base_url('imagenes/ventas/'.$img->nombre) ?>" class="img-thumbnail" style="height:90px;">
+					</a>
+				</div>
+			<?php } ?>
+		</div>
+	</div>
+</div>
+<?php } ?>
+

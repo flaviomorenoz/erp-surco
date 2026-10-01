@@ -564,4 +564,35 @@ class Sales_model extends CI_Model
             }
         }
     }
+
+    // ===================== IMAGENES (tabla tec_imagenes) =====================
+    // Guarda una imagen asociada a un registro. Ejemplo: tipo='VENTA', id2=id de la venta
+    public function guardar_imagen($tipo, $id2, $nombre){
+        // La tabla tec_imagenes no tiene auto_increment en id, se calcula el siguiente
+        $id = $this->db->query("select coalesce(max(id),0)+1 as nuevo from tec_imagenes")->row()->nuevo;
+
+        $ar["id"]       = $id;
+        $ar["tipo"]     = $tipo;
+        $ar["id2"]      = $id2;
+        $ar["nombre"]   = $nombre;
+
+        return $this->db->insert("tec_imagenes", $ar);
+    }
+
+    // Devuelve las imagenes asociadas a un registro (tipo + id2)
+    public function get_imagenes($tipo, $id2){
+        $cSql = "select id, tipo, id2, nombre from tec_imagenes where tipo = ? and id2 = ? order by id";
+        return $this->db->query($cSql, array($tipo, $id2))->result();
+    }
+
+    // Devuelve una imagen por su id
+    public function get_imagen($id){
+        $cSql = "select id, tipo, id2, nombre from tec_imagenes where id = ?";
+        return $this->db->query($cSql, array($id))->row();
+    }
+
+    // Elimina una imagen por su id
+    public function eliminar_imagen($id){
+        return $this->db->where("id", $id)->delete("tec_imagenes");
+    }
 }

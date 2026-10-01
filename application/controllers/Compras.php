@@ -46,7 +46,7 @@ class Compras extends CI_Controller {
             $result[$k]["imagenes"] = $this->icono_imagenes_compra($row["id"], $row["fotos"]);
         }
 
-        $ar_campos = array("id", "tienda", "fecha", "fecha_ingreso", "tipoDoc", "nroDoc", "proveedor", "username", "total", "actions", "imagenes");
+        $ar_campos = array("id", "tienda", "fecha", "fecha_ingreso", "tipoDoc", "nroDoc", "proveedor", "username", "total","imagenes", "actions");
         echo $this->fm->json_datatable($ar_campos, $result);
     }
 

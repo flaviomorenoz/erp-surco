@@ -44,6 +44,8 @@ class Sales extends CI_Controller {
         $this->data['page_title']   = "Agregar Ventas";
         $this->data['productos']    = $this->db->query("select name,marca,code,modelo,id from tec_products order by name,marca");
         $this->data["existe_apertura"] = $existe_apertura;
+        // Imagenes asociadas a la venta (tabla tec_imagenes, tipo = 'VENTA')
+        $this->data["ar_imagenes_venta"] = array();
         $this->template->load('view_layout_modern', 'sales/add', $this->data);
     }
 
@@ -194,6 +196,9 @@ class Sales extends CI_Controller {
                             $this->compras_model->disminuir_al_stock($item_id, $_SESSION["store_id"], $_REQUEST['quantity'][$i]);
                         }
 
+                        // Guardando las fotos adjuntas de la venta (tabla tec_imagenes, tipo='VENTA')
+                        $this->guardar_imagenes_venta($id);
+
                         $data = array();
                         $data["id"]             = $id;
                         $data["date"]           = $fecha;          
@@ -275,6 +280,81 @@ class Sales extends CI_Controller {
         }
 	}
 
+    // Guarda en disco y registra en tec_imagenes las fotos adjuntas a una venta
+    private function guardar_imagenes_venta($id){
+        if(!isset($_FILES["imagenes"])){
+            return;
+        }
+
+        $carpeta    = "imagenes/ventas/";
+        if(!is_dir($carpeta)){
+            @mkdir($carpeta, 0777, true);
+        }
+
+        $expensions = array("jpeg", "jpg", "png", "gif");
+        $archivos   = $_FILES["imagenes"];
+
+        // Normalizo por si llega un solo archivo o varios inputs con nombre="imagenes[]"
+        $nombres    = is_array($archivos["name"])     ? $archivos["name"]     : array($archivos["name"]);
+        $tmp_names  = is_array($archivos["tmp_name"]) ? $archivos["tmp_name"] : array($archivos["tmp_name"]);
+        $sizes      = is_array($archivos["size"])     ? $archivos["size"]     : array($archivos["size"]);
+
+        $n = count($nombres);
+
+        for($i = 0; $i < $n; $i++){
+            $file_tmp   = $tmp_names[$i];
+            $file_name  = $nombres[$i];
+            $file_size  = $sizes[$i];
+
+            if(strlen($file_tmp) == 0){
+                continue; // casilla sin archivo escogido
+            }
+
+            $ar_f       = explode('.', $file_name);
+            $file_ext   = strtolower(end($ar_f));
+
+            if(in_array($file_ext, $expensions) === false){
+                continue; // extension no permitida
+            }
+
+            if($file_size > 2097152){
+                continue; // mayor a 2 MB
+            }
+
+            // Nombre unico para no sobreescribir archivos con el mismo nombre
+            $nombre_nuevo = "venta_" . $id . "_" . uniqid() . "." . $file_ext;
+
+            if(move_uploaded_file($file_tmp, $carpeta . $nombre_nuevo)){
+                $this->sales_model->guardar_imagen("VENTA", $id, $nombre_nuevo);
+            }
+        }
+    }
+
+    // Elimina una foto asociada a una venta (registro en tec_imagenes y archivo en disco)
+    function eliminar_imagen(){
+        $ar = array();
+        if(isset($_REQUEST["id"])){
+            $id = $_REQUEST["id"];
+
+            $imagen = $this->sales_model->get_imagen($id);
+            if(!is_null($imagen)){
+                $archivo = "imagenes/ventas/" . $imagen->nombre;
+                if(file_exists($archivo)){
+                    unlink($archivo);
+                }
+            }
+
+            $this->sales_model->eliminar_imagen($id);
+
+            $ar["rpta_msg"] = "success";
+            $ar["message"]  = "Se eliminó la imagen";
+        }else{
+            $ar["rpta_msg"] = "danger";
+            $ar["message"]  = "No se pudo eliminar la imagen";
+        }
+        echo json_encode($ar);
+    }
+
     public function isServicio($item_id){
         $query = $this->db->select("prod_serv")->where("id",$item_id)->get("tec_products");
         foreach($query->result() as $r){
@@ -329,6 +409,7 @@ class Sales extends CI_Controller {
         round(total,2) total, round(grand_total,2) grand_total,  tec_users.username created_by, tec_sales.anulado,
             concat(tec_sales.serie,'-',tec_sales.correlativo) recibo, group_concat(substr(lcase(tec_products.name),1,12)) productos,
             if(tec_sales.envio_electronico = 1, '<i class=\'glyphicon glyphicon-ok\'></i>', '') as dir_comprobante, tec_sale_items.comment,
+            (select group_concat(i.nombre order by i.id separator ',') from tec_imagenes i where i.tipo = 'VENTA' and i.id2 = tec_sales.id) fotos,
             concat('<button onclick=\'ver_documento(', tec_sales.id, ')\'><i style = \'color:blue\' class=\'glyphicon glyphicon-eye-open\'></i></button>',
             '&nbsp;<button onclick=\'ver_documento_interno(',tec_sales.id,')\'><i style = \'color:green\' class=\'glyphicon glyphicon-eye-open\'></i></button>',
             '&nbsp;<button onclick=\'del_documento(',tec_sales.id,')\'><i style = \'color:red\' class=\'glyphicon glyphicon-remove\'></i></button>') as actions
@@ -364,7 +445,12 @@ class Sales extends CI_Controller {
         }
         //die("opcion:".$opcion);
 
-        $ar_campos = array("id","tienda","date","customer_name","recibo", "anulado","total", "grand_total", "productos", "dir_comprobante","actions","comment");  // 
+        // Agrego el icono de imagenes de cada venta (se previsualizan al pasar el mouse)
+        foreach($result as $k => $row){
+            $result[$k]["imagenes"] = $this->icono_imagenes_venta($row["id"], $row["fotos"]);
+        }
+
+        $ar_campos = array("id","tienda","date","customer_name","recibo", "anulado","total", "grand_total", "productos", "dir_comprobante","imagenes","actions","comment");  // 
         // ,"dir_comprobante"
 
         //if($this->Admin){
@@ -376,6 +462,21 @@ class Sales extends CI_Controller {
         
         //}
 
+    }
+
+    // Devuelve el HTML del icono de fotos de una venta, incluyendo las urls para la previsualizacion
+    private function icono_imagenes_venta($id, $fotos){
+        if(strlen($fotos) == 0){
+            return "<i class='glyphicon glyphicon-picture' style='font-size:16px;color:#cccccc' title='Sin imagenes'></i>";
+        }
+
+        $ar_urls = array();
+        foreach(explode(",", $fotos) as $nombre){
+            $ar_urls[] = base_url("imagenes/ventas/" . $nombre);
+        }
+
+        return "<a href='#' class='ver_fotos' data-fotos='" . implode("|", $ar_urls) . "' title='Ver imagenes'>" .
+               "<i class='glyphicon glyphicon-picture' style='font-size:16px;color:#2b7bb9'></i></a>";
     }
 
 	function view($id){

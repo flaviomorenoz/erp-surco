@@ -133,20 +133,20 @@ if(!isset($store_id)){
             <table id="example" class="display" style="width:100%; font-size: 12px; margin:0px!important;">
                 <thead>
                     <tr>
-                        <th style="max-width:45px;color:red;text-align:center;">id</th>
-                        <th style="max-width:55px;color:red;text-align:center;">Tienda</th>
-                        <th style="min-width:100px;color:red;">Fecha</th>
-                        <th style="min-width:170px;color:red;">Cliente</th>
-                        <th style="min-width:100px;color:red;">recibo</th>
+                        <th style="color:red;text-align:center;">id</th>
+                        <th style="color:red;text-align:center;">Tienda</th>
+                        <th style="color:red;">Fecha</th>
+                        <th style="color:red;">Cliente</th>
+                        <th style="color:red;">recibo</th>
 
-                        <th style="max-width:35px;color:red;text-align:center;">Nulo</th>
-                        <th style="min-width:35px;color:red;text-align:center;">subtotal</th>
-                        <th style="min-width:60px;color:red;">Total</th>
-                        <th style="min-width:150px;color:red;">Productos</th>
-                        <th style="min-width:10px;color:red;">Sunat</th>
+                        <th style="color:red;text-align:center;">Nulo</th>
+                        <th style="color:red;text-align:center;">subtotal</th>
+                        <th style="color:red;">Total</th>
+                        <th style="color:red;">Productos</th>
+                        <th style="color:red;">Sunat</th>
     					
-                        <th style="min-width:40px;color:red;text-align:center;">.</th>
-                        <th style="min-width:120px;color:red;">Actions</th>
+                        <th style="color:red;text-align:center;">.</th>
+                        <th style="color:red;">Actions</th>
                     </tr>
                 </thead>
                 <tfoot>
@@ -206,13 +206,10 @@ if(!isset($store_id)){
     
     $(document).ready(function() {
         $('#example').DataTable({
-            /*pageLength      : 13,*/
-            dom:            "Bfrtip",
+            dom:            "Blfrtip",
             order           : [[0,'desc']],
-            scrollY:        "355px",
-            scrollX:        true,
-            scrollCollapse: true,
-            paging:         false,
+            responsive:     true,
+            pageLength:     25,
             buttons:        [   { extend: 'copyHtml5', footer: true },
                                 { extend: 'excelHtml5', footer: true },
                                 { extend: 'csvHtml5', footer: true },
@@ -221,9 +218,6 @@ if(!isset($store_id)){
                                 }, 
                                 { extend: 'colvis', text: 'Filtro'} 
                             ],
-            fixedColumns:   {
-                left: 2
-            },
 
             "ajax": "<?= base_url("sales/get_sales/{$desde}/{$hasta}/{$store_id}") ?>",
             "footerCallback": function ( row, data, start, end, display ) {
@@ -416,5 +410,28 @@ if(!isset($store_id)){
     .table td:nth-child(4) { text-align: right;}
     #example.dataTable tbody td {
         padding: 2px 8px; /* reduce aún más el alto */
+    }
+    /* Grilla responsive: el wrapper y la tabla se adaptan al ancho de la ventana */
+    #example_wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+    #example {
+        width: 100%;
+    }
+    @media (max-width: 767px) {
+        #example_wrapper .dt-buttons {
+            display: block;
+            margin-bottom: 8px;
+        }
+        #example_wrapper .dt-buttons .btn {
+            margin: 0 4px 4px 0;
+        }
+        #example_wrapper .dataTables_filter {
+            text-align: left;
+        }
+        #example_wrapper .dataTables_filter input {
+            width: 100%;
+        }
     }
 </style>
